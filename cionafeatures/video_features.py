@@ -1,5 +1,5 @@
 import cv2
-from cionafeatures import Features
+from features import Features
 import numpy as np
 import matplotlib.cm
 cmap = matplotlib.cm.get_cmap('RdBu')
@@ -29,7 +29,7 @@ class FeatureVideo:
         pause = False
         while self.playing:
             ret, frame = self.cap.read()
-            if current_frame > 0:
+            if current_frame > init_frame:
                 for curv_mag, ptx, pty in zip(curv[current_frame, ::5],
                                               skel[current_frame, ::5, 0],
                                               skel[current_frame, ::5, 1]):
@@ -43,21 +43,23 @@ class FeatureVideo:
                     cv2.circle(frame, tuple(np.round([ptx, pty]).astype(np.int32)), 5,
                                (int(clr_base[0]), int(clr_base[1]), int(clr_base[2])), -1)
 
-            cv2.imshow('frame', frame)
-            k = cv2.waitKey(500)
-            if k & 0xFF == ord('q'):
-                self.playing = False
-            if k == 32:
-                pause = not pause
-
-            while pause:
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                cv2.putText(frame, 'frame: '+str(current_frame), (10, 30), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+                cv2.imshow('frame', frame)
                 k = cv2.waitKey(500)
+                if k & 0xFF == ord('q'):
+                    self.playing = False
                 if k == 32:
                     pause = not pause
+
+                while pause:
+                    k = cv2.waitKey(500)
+                    if k == 32:
+                        pause = not pause
             current_frame += 1
         return current_frame
 
-    def play_video_points(self,frames=None):
+    def play_video_with_points(self,frames=None):
         """
         play video where curvature is color coded
         :param frames: use all frame if None else use only frames [frames[0]:frames[1]
@@ -75,7 +77,7 @@ class FeatureVideo:
         pause = False
         while self.playing:
             ret, frame = self.cap.read()
-            if current_frame > 0:
+            if current_frame > init_frame:
 
                 pt1 = self.features._get_point_along_skel([0.2],current_frame).flatten()
                 pt2 = self.features._get_point_along_skel([0.6],current_frame).flatten()
@@ -83,22 +85,23 @@ class FeatureVideo:
                          tuple(np.round(pt1).astype(np.int32)),
                          tuple(np.round(pt2).astype(np.int32)),
                          (255,255,255))
-
-            cv2.imshow('frame', frame)
-            k = cv2.waitKey(500)
-            if k & 0xFF == ord('q'):
-                self.playing = False
-            if k == 32:
-                pause = not pause
-
-            while pause:
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                cv2.putText(frame, 'frame: ' + str(current_frame), (10, 30), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+                cv2.imshow('frame', frame)
                 k = cv2.waitKey(500)
+                if k & 0xFF == ord('q'):
+                    self.playing = False
                 if k == 32:
                     pause = not pause
+
+                while pause:
+                    k = cv2.waitKey(500)
+                    if k == 32:
+                        pause = not pause
             current_frame += 1
         return current_frame
 
-    def play_video_contour(self,frames=None):
+    def play_video_with_contour(self,frames=None):
         """
         play video with contour displayed
         :param frames: use all frame if None else use only frames [frames[0]:frames[1]
@@ -115,7 +118,7 @@ class FeatureVideo:
         pause = False
         while self.playing:
             ret, frame = self.cap.read()
-            if current_frame > 0:
+            if current_frame > init_frame:
                 cnt_pts = shape[current_frame]
                 print(cnt_pts.shape)
                 for i in range(len(cnt_pts) - 1):
@@ -126,17 +129,20 @@ class FeatureVideo:
                              tuple(np.round(pt2).astype(np.int32)),
                              (50, 150, 10),
                              2)
-            cv2.imshow('frame', frame)
-            k = cv2.waitKey(500)
-            if k & 0xFF == ord('q'):
-                self.playing = False
-            if k == 32:
-                pause = not pause
 
-            while pause:
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                cv2.putText(frame, 'frame: ' + str(current_frame), (10, 30), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
+                cv2.imshow('frame', frame)
                 k = cv2.waitKey(500)
+                if k & 0xFF == ord('q'):
+                    self.playing = False
                 if k == 32:
                     pause = not pause
+
+                while pause:
+                    k = cv2.waitKey(500)
+                    if k == 32:
+                        pause = not pause
             current_frame += 1
         return current_frame
 
@@ -150,4 +156,4 @@ if __name__== "__main__":
     video_file = vid_folder + '20180823_124209_1_15m0s_None_None_None.avi'
     feat = Features(hdf5_features_1)
     p = FeatureVideo(video_file, feat)
-    p.play_video_contour()
+    p.play_video_with_contour(frames=[100,200])

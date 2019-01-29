@@ -23,11 +23,10 @@ class Features:
     def get_skeleton(self):
         return self.features[SKELETON]
 
-    def get_curvature_spline(self,frames=None):
+    def get_curvature_spline(self):
         '''
         Calculate the curvature using univariate splines. This method is slower and can fail
         badly if the fit does not work, so I am only using it as testing
-        :param frames: use all frame if None else use only frames [frames[0]:frames[1]
         :return: curvatures
         '''
         if CURVATURE in self.features:
@@ -96,19 +95,15 @@ class Features:
 
 
 
-    def get_parametrize(self,frames=None):
+    def get_parametrize(self):
         """
         create vectorized coverage of skeleton and store it as PARAM_SKEL in hd5
-        :param frames: use all frame if None else use only frames [frames[0]:frames[1]
         :return: vectorized coverage of the skeleton
         """
         if PARAM_SKEL in self.features:
             return self.features[PARAM_SKEL]
 
-        if frames is None:
-            skel = self.features[SKELETON]
-        else:
-            skel = self.features[SKELETON][frames[0]:frames[1]]
+        skel = self.features[SKELETON]
         #get vectors along central skeleton
         vec_dir = np.array([np.diff(b, axis=0) for b in skel])
         #get length of each segment
